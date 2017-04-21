@@ -12,7 +12,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
-from Comparing import compare_methods
+from Comparing import compare_methods, compare_methods_h5py
 import argparse
 from utils.conf import Conf
 from StatisticalAnalysis.statisticalAnalysis import statisticalAnalysis
@@ -25,19 +25,19 @@ ap.add_argument("-c", "--conf", required=True, help="path to configuration file"
 args = vars(ap.parse_args())
 conf = Conf(args["conf"])
 featuresPath = conf["features_path"][0:conf["features_path"].rfind(".")] + "-"+ conf["model"] +".hdf5"
-db = h5py.File(featuresPath)
-labels = db["image_ids"]
+#db = h5py.File(featuresPath)
+#labels = db["image_ids"]
 labelEncoderPath = conf["label_encoder_path"][0:conf["label_encoder_path"].rfind(".")] + "-"+ conf["model"] +".cpickle"
-le = cPickle.loads(open(labelEncoderPath).read())
-labels = [le.transform([l.split(":")[0]])[0] for l in labels]
-df1 = pd.DataFrame([np.append(x,y) for (x,y) in zip(db["features"],labels)])
+#le = cPickle.loads(open(labelEncoderPath).read())
+#labels = [le.transform([l.split(":")[0]])[0] for l in labels]
+#df1 = pd.DataFrame([np.append(x,y) for (x,y) in zip(db["features"],labels)])
 featuresCSVPath = conf["features_csv_path"][0:conf["features_csv_path"].rfind(".")] + "-"+ conf["model"] +".csv"
 
-df1.to_csv(featuresCSVPath)
+#df1.to_csv(featuresCSVPath)
 # Loading dataset
 dataset = featuresCSVPath
-df = pd.read_csv(featuresCSVPath)
-data = df.ix[:, :-1].values
+#df = pd.read_csv(featuresCSVPath)
+#data = df.ix[:, :-1].values
 
 
 #================================================================================================================
@@ -47,7 +47,7 @@ clfRF = RandomForestClassifier(random_state=84,n_estimators=20)
 
 # specify parameters and distributions to sample from
 param_distRF = {"max_depth": [3, None],
-              "max_features": sp_randint(1, min(11,len(data[0]))),
+              "max_features": sp_randint(1, 11),
               "min_samples_leaf": sp_randint(1, 11),
               "bootstrap": [True, False],
               "criterion": ["gini", "entropy"]}
@@ -97,7 +97,7 @@ clfGB = GradientBoostingClassifier(random_state=84,n_estimators=20)
 
 # specify parameters and distributions to sample from
 param_distGB = {"max_depth": [3, None],
-              "max_features": sp_randint(1, min(11,len(data[0]))),
+              "max_features": sp_randint(1, 11),
               "min_samples_leaf": sp_randint(1, 11),
               "criterion": ["friedman_mse", "mse", "mae"]}
 
@@ -107,7 +107,8 @@ listAlgorithms = [clfRF,clfSVC,clfKNN,clfLR,clfMLP]
 listParams = [param_distRF,param_distSVC,param_distKNN,param_distLR,param_distMLP]
 listNames = ["RF", "SVM", "KNN", "LR", "MLP"]
 
-results = compare_methods(dataset,listAlgorithms,listParams,listNames,[20,10,10,5,10],normalization=False)
+#results = compare_methods(dataset,listAlgorithms,listParams,listNames,[20,10,10,5,10],normalization=False)
+results = compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParams,listNames,[20,10,10,5,10],normalization=False)
 
 df = pd.DataFrame.from_dict(results,orient='index')
 KFoldComparisionPath = conf["kfold_comparison"][0:conf["kfold_comparison"].rfind(".")] + "-"+ conf["model"] +".csv"

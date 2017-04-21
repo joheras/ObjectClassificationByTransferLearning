@@ -2,7 +2,7 @@
   #######
   # DATASET SAMPLING CONFIGURATION
   #######
-  "dataset_path": "/home/joheras/Escritorio/Research/Fungi/FungiImagesOverfeat",
+  "dataset_path": "/home/jonathan/Escritorio/Investigación/Fungi/FungiImagesOverfeat",
   "features_path": "output/fungi/features.hdf5",
 
   #######
@@ -26,7 +26,7 @@
   # Possible values for model are: vgg16, vgg19, resnet, inception, googlenet, overfeat, y xception (solo con tensorflow)
   #######
 
-  "model" : "vgg16",
+  "model" : "inception",
 
   #######
   # CLASSIFIER CONFIGURATION
