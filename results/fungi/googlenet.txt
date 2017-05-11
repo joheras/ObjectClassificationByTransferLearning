@@ -1,0 +1,57 @@
+['KNN' 'RF' 'SVM' 'LR' 'MLP']
+==========================================================
+Report
+==========================================================
+**********************************************************
+Mean and std
+**********************************************************
+KNN: 0.492063 (0.038148)
+RF: 0.894726 (0.021203)
+SVM: 0.605143 (0.048245)
+LR: 0.894738 (0.024171)
+MLP: 0.857593 (0.059371)
+**********************************************************
+Statistical tests
+**********************************************************
+----------------------------------------------------------
+Checking parametric conditions 
+----------------------------------------------------------
+Checking independence 
+Ok
+Checking normality using Shapiro-Wilk's test for normality, alpha=0.05
+W: 0.828796, p:0.000004
+The null hypothesis (normality) is rejected
+Checking heteroscedasticity using Levene's test, alpha=0.05
+W: 1.174606, p:0.334747
+The null hypothesis (heteroscedasticity) is accepted
+Conditions for a parametric test are not fulfilled, applying a non-parametric test
+----------------------------------------------------------
+Working with more than 2 algorithms
+----------------------------------------------------------
+----------------------------------------------------------
+Applying Friedman test
+----------------------------------------------------------
+F-value: 45.054054, p-value: 1.54765089633e-13
+Null hypothesis is rejected; hence, models have different performance
+Technique      Ranking
+-----------  ---------
+RF                4.35
+LR                4.1
+MLP               3.55
+SVM               2
+KNN               1
+Winner model: RF
+----------------------------------------------------------
+Applying Holm p-value adjustment procedure and analysing effect size
+----------------------------------------------------------
+Comparison      Zvalue      p-value    adjusted p-value
+------------  --------  -----------  ------------------
+RF vs KNN     4.73762   2.16248e-06         8.64991e-06
+RF vs SVM     3.3234    0.000889267         0.0026678
+RF vs MLP     1.13137   0.257899            0.515798
+RF vs LR      0.353553  0.723674            0.723674
+There is a significant difference between the models: RF (mean: 0.894726, std: 0.021203) and KNN (mean: 0.492063, std: 0.038148) (Cohen's d=12.3779564058, Large)
+There is a significant difference between the models: RF (mean: 0.894726, std: 0.021203) and SVM (mean: 0.605143, std: 0.048245) (Cohen's d=7.37237271375, Large)
+We can't say that there is a significant difference in the performance of the models: RF (mean: 0.894726, std: 0.021203) and MLP (mean: 0.857593, std: 0.059371) (Cohen's d=0.7902316988, Large)
+We can't say that there is a significant difference in the performance of the models: RF (mean: 0.894726, std: 0.021203) and LR (mean: 0.894738, std: 0.024171) (Cohen's d=0.000521523979822, Small)
+Eta squared: 0.944136 (Large)

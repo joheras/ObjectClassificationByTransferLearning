@@ -6,6 +6,38 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
 import h5py
 import cPickle
+from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
+
+def apply_algorithm(tuple):
+    clf, params, name, n_iter,trainData, trainLabels,testData,testLabels = tuple
+    print(name)
+    if params is None:
+        model = clf
+    else:
+        model = RandomizedSearchCV(clf, param_distributions=params, n_iter=n_iter)
+    model.fit(trainData, trainLabels)
+    predictions = model.predict(testData)
+    return (name,accuracy_score(testLabels, predictions))
+
+
+def compare_method(tuple):
+    i, (train_index, test_index),data,labels,listAlgorithms,listParameters,listAlgorithmNames,listNiters,normalization = tuple
+    print("Iteration " + str(i+1))
+    results = {name: [] for name in listAlgorithmNames}
+    trainData, testData = data[train_index], data[test_index]
+    trainLabels, testLabels = labels[train_index], labels[test_index]
+
+    tuple = [(clf, params, name, n_iter, trainData, trainLabels, testData, testLabels) for clf, params, name, n_iter in
+             zip(listAlgorithms, listParameters, listAlgorithmNames, listNiters)]
+    #p = ThreadPool(len(listAlgorithms))
+    comparison = map(apply_algorithm, tuple)
+    for (name, comp) in comparison:
+        results[name].append(comp)
+    print("Finished iteration " + str(i))
+    return (i,results)
+
+
 
 def compare_methods(dataset,listAlgorithms,listParameters,listAlgorithmNames,listNiters,normalization=False):
 
@@ -13,12 +45,18 @@ def compare_methods(dataset,listAlgorithms,listParameters,listAlgorithmNames,lis
     df = pd.read_csv(dataset)
     data = df.ix[:, :-1].values
     labels = df.ix[:, -1].values
-    print labels
     kf = KFold(n_splits=10,shuffle=True,random_state=42)
     results = {name:[] for name in listAlgorithmNames}
+    # tuple = [(i,(train_index,test_index),data,labels,listAlgorithms,listParameters,listAlgorithmNames,listNiters,normalization) for i,(train_index,test_index) in enumerate(kf.split(data))]
+    # comparison = map(compare_method, tuple)
+    #
+    # for i,result in comparison:
+    #     for name in listAlgorithmNames:
+    #         results[name].append(result[name])
+
 
     for i,(train_index,test_index) in enumerate(kf.split(data)):
-        print "Iteration " + str(i)
+        print "Iteration " + str(i+1) + "/10"
 
         trainData , testData = data[train_index],data[test_index]
         trainLabels, testLabels = labels[train_index], labels[test_index]
@@ -31,7 +69,12 @@ def compare_methods(dataset,listAlgorithms,listParameters,listAlgorithmNames,lis
             testData = np.asarray(testData).astype("float64")
             testData -= np.mean(testData, axis=0)
             testData /= np.std(testData, axis=0)
-
+        # tuple = [(clf,params,name,n_iter,trainData, trainLabels,testData,testLabels) for clf,params,name,n_iter in zip(listAlgorithms,listParameters,listAlgorithmNames,listNiters)]
+        # p = Pool(len(listAlgorithms))
+        # comparison = p.map(apply_algorithm, tuple)
+        # for (name, comp) in comparison:
+        #     results[name].append(comp)
+        #
         for clf,params,name,n_iter in zip(listAlgorithms,listParameters,listAlgorithmNames,listNiters):
             print(name)
             if params is None:
@@ -55,9 +98,15 @@ def compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParame
     
     le = cPickle.loads(open(labelEncoderPath).read())
     labels = np.asarray([le.transform([l.split(":")[0]])[0] for l in labels])
-    print labels
     kf = KFold(n_splits=10,shuffle=True,random_state=42)
     results = {name:[] for name in listAlgorithmNames}
+    # p = Pool(10)
+    # tuple = [(i,(train_index,test_index),data,labels,listAlgorithms,listParameters,listAlgorithmNames,listNiters,normalization) for i,(train_index,test_index) in enumerate(kf.split(data))]
+    # comparison = p.map(compare_method, tuple)
+    #
+    # for i,result in comparison:
+    #     for name in listAlgorithmNames:
+    #         results[name].append(result[name])
 
     for i,(train_index,test_index) in enumerate(kf.split(data)):
         print "Iteration " + str(i)
@@ -72,16 +121,21 @@ def compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParame
             testData = np.asarray(testData).astype("float64")
             testData -= np.mean(testData, axis=0)
             testData /= np.std(testData, axis=0)
-
-        for clf,params,name,n_iter in zip(listAlgorithms,listParameters,listAlgorithmNames,listNiters):
+        for clf, params, name, n_iter in zip(listAlgorithms, listParameters, listAlgorithmNames, listNiters):
             print(name)
             if params is None:
                 model = clf
             else:
-                model = RandomizedSearchCV(clf, param_distributions=params,n_iter=n_iter)
+                model = RandomizedSearchCV(clf, param_distributions=params, n_iter=n_iter)
             model.fit(trainData, trainLabels)
             predictions = model.predict(testData)
             results[name].append(accuracy_score(testLabels, predictions))
+        # tuple = [(clf, params, name, n_iter, trainData, trainLabels, testData, testLabels) for clf, params, name, n_iter
+        #          in zip(listAlgorithms, listParameters, listAlgorithmNames, listNiters)]
+        # p = Pool(len(listAlgorithms))
+        # comparison = p.map(apply_algorithm, tuple)
+        # for (name, comp) in comparison:
+        #     results[name].append(comp)
 
     return results
 
