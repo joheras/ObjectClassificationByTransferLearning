@@ -1,0 +1,51 @@
+results/fungiWithControl/kfold-best.csv
+['Googlenet-SVM' 'Inception-LR' 'Overfeat-LR' 'Resnet-SVM' 'VGG16-ET'
+ 'VGG19-ET' 'Xception-LR']
+==========================================================
+Report
+==========================================================
+**********************************************************
+Mean and std
+**********************************************************
+Googlenet-SVM: 0.954451 (0.022672)
+Inception-LR: 0.955251 (0.016114)
+Overfeat-LR: 0.927321 (0.021554)
+Resnet-SVM: 0.965644 (0.016804)
+VGG16-ET: 0.950463 (0.020520)
+VGG19-ET: 0.944076 (0.016818)
+Xception-LR: 0.952844 (0.023070)
+**********************************************************
+Statistical tests
+**********************************************************
+----------------------------------------------------------
+Checking parametric conditions 
+----------------------------------------------------------
+Checking independence 
+Ok
+Checking normality using Shapiro-Wilk's test for normality, alpha=0.05
+W: 0.968326, p:0.073274
+The null hypothesis (normality) is accepted
+Checking heteroscedasticity using Levene's test, alpha=0.05
+W: 0.646672, p:0.692513
+The null hypothesis (heteroscedasticity) is accepted
+Conditions for a parametric test are fulfilled
+----------------------------------------------------------
+Working with more than 2 algorithms
+----------------------------------------------------------
+----------------------------------------------------------
+Applying ANOVA test
+----------------------------------------------------------
+F-value: 0.219435, p-value: 0.969181348541
+Null hypothesis is accepted; hence, we can't say that there is a significant difference in the performance of the models
+----------------------------------------------------------
+Analysing effect size
+----------------------------------------------------------
+We take the model with the best mean (Resnet-SVM, mean: 0.965644) and compare it with the other models: 
+Comparing effect size of Resnet-SVM and Googlenet-SVM: Cohen's d=0.53216240298, Large
+Comparing effect size of Resnet-SVM and Inception-LR: Cohen's d=0.598953103479, Large
+Comparing effect size of Resnet-SVM and Overfeat-LR: Cohen's d=1.88131384241, Large
+Comparing effect size of Resnet-SVM and VGG16-ET: Cohen's d=0.767932025263, Large
+Comparing effect size of Resnet-SVM and VGG19-ET: Cohen's d=1.21716297216, Large
+Comparing effect size of Resnet-SVM and Xception-LR: Cohen's d=0.601697075996, Large
+Eta squared: 0.235641 (Large)
+
