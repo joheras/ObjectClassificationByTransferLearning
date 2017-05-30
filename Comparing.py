@@ -3,6 +3,11 @@ import numpy as np
 from sklearn.cross_validation import train_test_split
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+
 from sklearn.model_selection import KFold
 import h5py
 import cPickle
@@ -46,7 +51,11 @@ def compare_methods(dataset,listAlgorithms,listParameters,listAlgorithmNames,lis
     data = df.ix[:, :-1].values
     labels = df.ix[:, -1].values
     kf = KFold(n_splits=10,shuffle=True,random_state=42)
-    results = {name:[] for name in listAlgorithmNames}
+    resultsAccuracy = {name:[] for name in listAlgorithmNames}
+    #resultsAUROC = {name: [] for name in listAlgorithmNames}
+    resultsPrecision = {name: [] for name in listAlgorithmNames}
+    resultsRecall = {name: [] for name in listAlgorithmNames}
+    resultsFmeasure = {name: [] for name in listAlgorithmNames}
     # tuple = [(i,(train_index,test_index),data,labels,listAlgorithms,listParameters,listAlgorithmNames,listNiters,normalization) for i,(train_index,test_index) in enumerate(kf.split(data))]
     # comparison = map(compare_method, tuple)
     #
@@ -83,9 +92,14 @@ def compare_methods(dataset,listAlgorithms,listParameters,listAlgorithmNames,lis
                 model = RandomizedSearchCV(clf, param_distributions=params,n_iter=n_iter)
             model.fit(trainData, trainLabels)
             predictions = model.predict(testData)
-            results[name].append(accuracy_score(testLabels, predictions))
+            resultsAccuracy[name].append(accuracy_score(testLabels, predictions))
+            #resultsAUROC[name].append(roc_auc_score(testLabels, predictions))
+            resultsPrecision[name].append(precision_score(testLabels, predictions))
+            resultsRecall[name].append(recall_score(testLabels, predictions))
+            resultsFmeasure[name].append(f1_score(testLabels, predictions))
 
-    return results
+    return (resultsAccuracy,resultsPrecision,resultsRecall,resultsFmeasure)
+
 
 
 
@@ -99,7 +113,11 @@ def compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParame
     le = cPickle.loads(open(labelEncoderPath).read())
     labels = np.asarray([le.transform([l.split(":")[0]])[0] for l in labels])
     kf = KFold(n_splits=10,shuffle=True,random_state=42)
-    results = {name:[] for name in listAlgorithmNames}
+    resultsAccuracy = {name:[] for name in listAlgorithmNames}
+    #resultsAUROC = {name: [] for name in listAlgorithmNames}
+    # resultsPrecision = {name: [] for name in listAlgorithmNames}
+    # resultsRecall = {name: [] for name in listAlgorithmNames}
+    # resultsFmeasure = {name: [] for name in listAlgorithmNames}
     # p = Pool(10)
     # tuple = [(i,(train_index,test_index),data,labels,listAlgorithms,listParameters,listAlgorithmNames,listNiters,normalization) for i,(train_index,test_index) in enumerate(kf.split(data))]
     # comparison = p.map(compare_method, tuple)
@@ -129,7 +147,11 @@ def compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParame
                 model = RandomizedSearchCV(clf, param_distributions=params, n_iter=n_iter)
             model.fit(trainData, trainLabels)
             predictions = model.predict(testData)
-            results[name].append(accuracy_score(testLabels, predictions))
+            resultsAccuracy[name].append(accuracy_score(testLabels, predictions))
+            #resultsAUROC[name].append(roc_auc_score(testLabels, predictions))
+            # resultsPrecision[name].append(precision_score(testLabels, predictions))
+            # resultsRecall[name].append(recall_score(testLabels, predictions))
+            # resultsFmeasure[name].append(f1_score(testLabels, predictions))
         # tuple = [(clf, params, name, n_iter, trainData, trainLabels, testData, testLabels) for clf, params, name, n_iter
         #          in zip(listAlgorithms, listParameters, listAlgorithmNames, listNiters)]
         # p = Pool(len(listAlgorithms))
@@ -137,6 +159,6 @@ def compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParame
         # for (name, comp) in comparison:
         #     results[name].append(comp)
 
-    return results
+    return resultsAccuracy
 
 

@@ -16,6 +16,7 @@ from Comparing import compare_methods, compare_methods_h5py
 import argparse
 from utils.conf import Conf
 from StatisticalAnalysis.statisticalAnalysis import statisticalAnalysis
+from sklearn.ensemble import ExtraTreesClassifier
 import h5py
 import numpy as np
 import cPickle
@@ -101,29 +102,28 @@ param_distGB = {"max_depth": [3, None],
               "min_samples_leaf": sp_randint(1, 11),
               "criterion": ["friedman_mse", "mse", "mae"]}
 
+#================================================================================================================
+print("Extra trees")
+#================================================================================================================
+clfET = ExtraTreesClassifier(random_state=84,n_estimators=20)
+
+param_distET = {'n_estimators': [250, 500, 1000, 1500],
+                'min_samples_split': [2, 4, 8]}
 
 
-listAlgorithms = [clfRF,clfSVC,clfKNN,clfLR,clfMLP]
-listParams = [param_distRF,param_distSVC,param_distKNN,param_distLR,param_distMLP]
-listNames = ["RF", "SVM", "KNN", "LR", "MLP"]
+print("-------------------------------------------------")
+print("Statistical Analysis")
+print("-------------------------------------------------")
 
-#results = compare_methods(dataset,listAlgorithms,listParams,listNames,[20,10,10,5,10],normalization=False)
-results = compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParams,listNames,[20,10,10,5,10],normalization=False)
+listAlgorithms = [clfRF,clfSVC,clfKNN,clfLR,clfMLP,clfET]
+listParams = [param_distRF,param_distSVC,param_distKNN,param_distLR,param_distMLP,param_distET]
+listNames = ["RF", "SVM", "KNN", "LR", "MLP","ET"]
 
-df = pd.DataFrame.from_dict(results,orient='index')
-KFoldComparisionPath = conf["kfold_comparison"][0:conf["kfold_comparison"].rfind(".")] + "-"+ conf["model"] +".csv"
-df.to_csv(KFoldComparisionPath)
+resultsAccuracy = compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParams,listNames,[10],normalization=False)
 
-statisticalAnalysis(KFoldComparisionPath)
+dfAccuracy = pd.DataFrame.from_dict(resultsAccuracy,orient='index')
+KFoldComparisionPathAccuracy = conf["kfold_comparison"][0:conf["kfold_comparison"].rfind(".")] + "-et-"+ conf["model"] +".csv"
+dfAccuracy.to_csv(KFoldComparisionPathAccuracy)
 
-
-
-
-
-
-
-
-
-
-
+statisticalAnalysis(KFoldComparisionPathAccuracy)
 

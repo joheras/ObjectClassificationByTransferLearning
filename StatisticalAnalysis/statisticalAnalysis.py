@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import operator
 from scipy.stats import shapiro,levene,ttest_ind,wilcoxon
 from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 
 from stac.nonparametric_tests import quade_test,holm_test,friedman_test
 from stac.parametric_tests import anova_test,bonferroni_test
@@ -91,7 +92,7 @@ def multipleAlgorithmsNonParametric(algorithms,accuracies,alpha=0.05):
 
         maximum = max(means)
         print("We take the model with the best mean (%s, mean: %f) and compare it with the other models: " % (
-        algorithms[means.index(maximum)], maximum))
+        algorithms[means.tolist().index(maximum)], maximum))
         for i in range(0,len(algorithms)):
             if i != means.tolist().index(maximum):
                 cohend = abs(cohen_d(algorithmsDataset[algorithms[means.tolist().index(maximum)]], algorithmsDataset[algorithms[i]]))
@@ -379,7 +380,7 @@ def compare_methods(data,labels,listAlgorithms,listParameters,listAlgorithmNames
     tuple = [(i,train_index,test_index,data,labels,x,y,z,metric) for i,(train_index,test_index) in enumerate(kf.split(data))
                   for (x, y, z) in zip(listAlgorithms, listParameters, listAlgorithmNames)]
 
-    p = Pool(len(listAlgorithms))
+    p = ThreadPool(len(listAlgorithms))
 
     comparison=p.map(compare_method,tuple)
     for (name,comp) in comparison:

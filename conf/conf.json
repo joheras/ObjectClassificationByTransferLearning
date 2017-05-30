@@ -3,17 +3,17 @@
   # DATASET SAMPLING CONFIGURATION
   #######
   # For only considering images without control image: /home/joheras/Escritorio/Research/Fungi/FungiImagesOverfeat
-  "dataset_path": "/home/joheras/Escritorio/Research/Fungi/FungiImagesWithControl",
+  "dataset_path": "/home/joheras/Escritorio/Research/Fungi/FungiImagesOverfeat",
   # For only considering images without control image: output/fungi/features.hdf5
-  "features_path": "output/fungiWithControl/features.hdf5",
+  "features_path": "output/fungi/features.hdf5",
 
   #######
   # STATISTICAL COMPARISON CONFIGURATION
   #######
   # For only considering images without control image: output/fungi/features.csv
-  "features_csv_path": "output/fungiWithControl/features.csv",
-   # For only considering images without control image: results/fungi/kfold-comparison.csv
-  "kfold_comparison": "results/fungiWithControl/kfold-comparison.csv",
+  "features_csv_path": "output/fungi/features.csv",
+  # For only considering images without control image: results/fungi/kfold-comparison.csv "results/fungiWithControl/kfold-comparison.csv",
+  "kfold_comparison": "results/fungi/kfold-comparison.csv",
 
   #######
   # Batch CONFIGURATION
@@ -24,14 +24,14 @@
   # LABEL ENCODER CONFIGURATION
   #######
   # For only considering images without control image: output/fungi/le.cpickle
-  "label_encoder_path": "output/fungiWithControl/le.cpickle",
+  "label_encoder_path": "output/fungi/le.cpickle",
 
   #######
   # MODEL CONFIGURATION
   # Possible values for model are: vgg16, vgg19, resnet, inception, googlenet, overfeat, y xception (solo con tensorflow)
   #######
 
-  "model" : "xception",
+  "model" : "vgg16",
 
   #######
   # CLASSIFIER CONFIGURATION
