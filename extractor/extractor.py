@@ -9,6 +9,7 @@ from keras.applications import Xception # TensorFlow ONLY
 from keras.applications import VGG16
 from keras.applications import VGG19
 import numpy as np
+from shallowmodels.models import LABModel,HSVModel,Haralick,LBP,HOG,HistogramsSeveralMasksAnnulusLabSegments,HaarHOG
 
 MODELS = {
 	"vgg16": VGG16,
@@ -31,6 +32,29 @@ class Extractor:
 			self.model=GoogLeNetTransformer()
 		if modelText == "overfeat":
 			self.model = OverfeatTransformer(output_layers=[-3])
+		if modelText == "lab888":
+			self.model = LABModel()
+		if modelText == "lab444":
+			self.model = HSVModel(bins=[4,4,4])
+		if modelText == "hsv888":
+			self.model = LABModel()
+		if modelText == "hsv444":
+			self.model = HSVModel(bins=[4, 4, 4])
+		if modelText == "haralick":
+			self.model = Haralick()
+		if modelText == "lbp":
+			self.model = LBP()
+		if modelText == "hog":
+			self.model = HOG()
+		if modelText == "haarhog":
+			self.model = HaarHOG()
+		if modelText == "manual888":
+			self.model = HistogramsSeveralMasksAnnulusLabSegments(plainImagePath="/home/joheras/Escritorio/Research/Fungi/FungiImages/plain.jpg")
+		if modelText == "manual444":
+			self.model = HistogramsSeveralMasksAnnulusLabSegments(plainImagePath="/home/joheras/Escritorio/Research/Fungi/FungiImages/plain.jpg",bags=[4,4,4])
+		if modelText == "manual161616":
+			self.model = HistogramsSeveralMasksAnnulusLabSegments(
+				plainImagePath="/home/joheras/Escritorio/Research/Fungi/FungiImages/plain.jpg", bags=[16, 16, 16])
 
 	def reshape(self,res):
 		if(self.modelText=="resnet"):
@@ -44,4 +68,6 @@ class Extractor:
 			return [self.reshape(self.model.predict(image)) for image in images]
 		if self.modelText in ("googlenet","overfeat"):
 			return self.model.transform(images)
+		else:
+			return [self.model.describe(image) for image in images]
 

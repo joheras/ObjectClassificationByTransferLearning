@@ -35,7 +35,9 @@ def build_batch(paths,model):
 	# load the images from disk, prepare them for extraction, and convert
 	# the list to a NumPy array
 	images = [prepare_image(p,model) for p in paths]
-	images = np.array(images, dtype="float")
+	if model in ("inception", "xception", "vgg16","vgg19","resnet","inception", "xception"):
+		images = np.array(images, dtype="float")
+
 
 	# extract the labels from the image paths
 	labels = [":".join(p.split("/")[-2:]) for p in paths]

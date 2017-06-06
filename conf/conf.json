@@ -29,9 +29,10 @@
   #######
   # MODEL CONFIGURATION
   # Possible values for model are: vgg16, vgg19, resnet, inception, googlenet, overfeat, y xception (solo con tensorflow)
+  # Shallow features: lab888, lab444, hsv888, hsv444, haralick, lbp, hog, haarhog
   #######
 
-  "model" : "vgg16",
+  "model" : "haralick",
 
   #######
   # CLASSIFIER CONFIGURATION
