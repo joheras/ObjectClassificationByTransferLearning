@@ -1,0 +1,45 @@
+{
+  #######
+  # DATASET SAMPLING CONFIGURATION
+  #######
+  # For only considering images without control image: /home/joheras/Escritorio/Research/Fungi/FungiImagesOverfeat
+  "dataset_path": "/home/joheras/Escritorio/Research/ACoruna",
+  # For only considering images without control image: output/fungi/features.hdf5
+  "features_path": "output/fungiWithControl/features.hdf5",
+
+  #######
+  # STATISTICAL COMPARISON CONFIGURATION
+  #######
+  # For only considering images without control image: output/fungi/features.csv
+  "features_csv_path": "output/fungiWithControl/features.csv",
+  # For only considering images without control image: results/fungi/kfold-comparison.csv "results/fungiWithControl/kfold-comparison.csv",
+  "kfold_comparison": "results/fungiWithControl/kfold-comparison.csv",
+
+  #######
+  # Batch CONFIGURATION
+  #######
+  "batch_size": 32,
+
+  #######
+  # LABEL ENCODER CONFIGURATION
+  #######
+  # For only considering images without control image: output/fungi/le.cpickle
+  "label_encoder_path": "output/fungiWithControl/le.cpickle",
+
+  #######
+  # MODEL CONFIGURATION
+  # Possible values for model are: vgg16, vgg19, resnet, inception, googlenet, overfeat, y xception (solo con tensorflow)
+  # Shallow features: lab888, lab444, hsv888, hsv444, haralick, lbp, hog, haarhog
+  #######
+
+  "model" : "resnet",
+
+  #######
+  # CLASSIFIER CONFIGURATION
+  #######
+  "classifier_path": "output/fungiWithControl/classifier",
+  "training_size": 1,
+  "results_path": "output/fungiWithControl/results",
+  "modelClassifier" : "SVM"
+
+}
