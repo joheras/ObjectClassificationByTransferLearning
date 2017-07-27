@@ -4,7 +4,7 @@
 #=======================================================================================================================
 
 
-
+from sklearn.cross_validation import train_test_split
 from scipy.stats import randint as sp_randint
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 import pandas as pd
@@ -12,19 +12,23 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
-from Comparing import compare_methods_h5py
+from Comparing import compare_methods, compare_methods_h5py
 import argparse
 from utils.conf import Conf
 from StatisticalAnalysis.statisticalAnalysis import statisticalAnalysis
 from sklearn.ensemble import ExtraTreesClassifier
+import h5py
+import numpy as np
+import cPickle
 import sys
+import progressbar
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-c", "--conf", required=True, help="path to configuration file")
 args = vars(ap.parse_args())
 conf = Conf(args["conf"])
 print(conf["model"])
-featuresPath = conf["features_path"][0:conf["features_path"].rfind(".")] + "-"+ conf["model"] +".hdf5"
+
 #db = h5py.File(featuresPath)
 #labels = db["image_ids"]
 labelEncoderPath = conf["label_encoder_path"][0:conf["label_encoder_path"].rfind(".")] + "-"+ conf["model"] +".cpickle"
@@ -110,9 +114,6 @@ param_distET = {'n_estimators': [250, 500, 1000, 1500],
                 'min_samples_split': [2, 4, 8]}
 
 
-
-sys.stdout = open(conf["kfold_comparison"][0:conf["kfold_comparison"].rfind("/")+1] + conf["model"] + ".txt", "w")
-
 print("-------------------------------------------------")
 print("Statistical Analysis")
 print("-------------------------------------------------")
@@ -121,12 +122,20 @@ listAlgorithms = [clfRF,clfSVC,clfKNN,clfLR,clfMLP,clfET]
 listParams = [param_distRF,param_distSVC,param_distKNN,param_distLR,param_distMLP,param_distET]
 listNames = ["RF", "SVM", "KNN", "LR", "MLP","ET"]
 
-resultsAccuracy = compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParams,listNames,[10,10,10,5,10,10],normalization=False)
+featuresFiles = ["annulus_4_6", "annulus_8_6","annulus_16_6"]
 
-dfAccuracy = pd.DataFrame.from_dict(resultsAccuracy,orient='index')
-KFoldComparisionPathAccuracy = conf["kfold_comparison"][0:conf["kfold_comparison"].rfind(".")] + "-"+ conf["model"] +".csv"
-dfAccuracy.to_csv(KFoldComparisionPathAccuracy)
+for featuresFile in featuresFiles:
+    print featuresFile
+    featuresPath = "output/fungiWithControl/features-" + featuresFile + ".hdf5"
+    sys.stdout = open("results/fungiWithControl/" + featuresFile + "_with.txt", "w")
 
-statisticalAnalysis(KFoldComparisionPathAccuracy)
-sys.stdout = sys.__stdout__
+    resultsAccuracy = compare_methods_h5py(featuresPath, labelEncoderPath, listAlgorithms, listParams, listNames,
+                                           [10, 10, 10, 5, 10, 10], normalization=True)
 
+    dfAccuracy = pd.DataFrame.from_dict(resultsAccuracy, orient='index')
+    KFoldComparisionPathAccuracy = conf["kfold_comparison"][
+                                   0:conf["kfold_comparison"].rfind(".")] + "-" + featuresFile + "-with.csv"
+    dfAccuracy.to_csv(KFoldComparisionPathAccuracy)
+
+    statisticalAnalysis(KFoldComparisionPathAccuracy)
+    sys.stdout = sys.__stdout__

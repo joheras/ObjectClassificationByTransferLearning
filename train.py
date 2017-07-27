@@ -76,42 +76,42 @@ elif conf["modelClassifier"] == "MLP":
 model.fit(trainData, trainLabels)
 print("[INFO] best hyperparameters: {}".format(model.best_params_))
 
-# open the results file for writing and initialize the total number of accurate
-# rank-1 and rank-5 predictions
-print("[INFO] evaluating...")
-f = open(conf["results_path"] + conf["modelClassifier"] + ".txt", "w")
-rank1 = 0
-rank5 = 0
-
-# loop over the testing data
-for (label, features) in zip(testLabels, testData):
-	# predict the probability of each class label and grab the top-5 labels
-	# (based on probabiltiy)
-	preds = model.predict_proba(np.atleast_2d(features))[0]
-	preds = np.argsort(preds)[::-1][:5]
-
-	# if the correct label if the first entry in the predicted labels list,
-	# increment the number of correct rank-1 predictions
-	if label == preds[0]:
-		rank1 += 1
-
-	# if the correct label is in the top-5 predicted labels, then increment
-	# the number of correct rank-5 predictions
-	if label in preds:
-		rank5 += 1
-
-# convert the accuracies to percents and write them to file
-rank1 = (rank1 / float(len(testLabels))) * 100
-rank5 = (rank5 / float(len(testLabels))) * 100
-f.write("rank-1: {:.2f}%\n".format(rank1))
-f.write("rank-5: {:.2f}%\n\n".format(rank5))
-
-# write the classification report to file and close the output file
-predictions = model.predict(testData)
-f.write("{}\n".format(classification_report(testLabels, predictions,
-	target_names=le.classes_)))
-f.write("Accuracy: {:.2f}%\n".format(accuracy_score(testLabels,predictions)))
-f.close()
+# # open the results file for writing and initialize the total number of accurate
+# # rank-1 and rank-5 predictions
+# print("[INFO] evaluating...")
+# f = open(conf["results_path"] + conf["modelClassifier"] + ".txt", "w")
+# rank1 = 0
+# rank5 = 0
+#
+# # loop over the testing data
+# for (label, features) in zip(testLabels, testData):
+# 	# predict the probability of each class label and grab the top-5 labels
+# 	# (based on probabiltiy)
+# 	preds = model.predict_proba(np.atleast_2d(features))[0]
+# 	preds = np.argsort(preds)[::-1][:5]
+#
+# 	# if the correct label if the first entry in the predicted labels list,
+# 	# increment the number of correct rank-1 predictions
+# 	if label == preds[0]:
+# 		rank1 += 1
+#
+# 	# if the correct label is in the top-5 predicted labels, then increment
+# 	# the number of correct rank-5 predictions
+# 	if label in preds:
+# 		rank5 += 1
+#
+# # convert the accuracies to percents and write them to file
+# rank1 = (rank1 / float(len(testLabels))) * 100
+# rank5 = (rank5 / float(len(testLabels))) * 100
+# f.write("rank-1: {:.2f}%\n".format(rank1))
+# f.write("rank-5: {:.2f}%\n\n".format(rank5))
+#
+# # write the classification report to file and close the output file
+# predictions = model.predict(testData)
+# f.write("{}\n".format(classification_report(testLabels, predictions,
+# 	target_names=le.classes_)))
+# f.write("Accuracy: {:.2f}%\n".format(accuracy_score(testLabels,predictions)))
+# f.close()
 
 # dump classifier to file
 print("[INFO] dumping classifier...")

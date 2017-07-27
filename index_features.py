@@ -51,6 +51,7 @@ for (i, paths) in enumerate(dataset.chunk(imagePaths, conf["batch_size"])):
 	(labels, images) = dataset.build_batch(paths, conf["model"])
 	features = oe.describe(images)
 
+
 	# loop over each set of (label, vector) pair and add them to the indexer
 	for (label, vector) in zip(labels, features):
 		oi.add(label, vector)

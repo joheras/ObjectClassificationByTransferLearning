@@ -9,7 +9,7 @@ from keras.applications import Xception # TensorFlow ONLY
 from keras.applications import VGG16
 from keras.applications import VGG19
 import numpy as np
-from shallowmodels.models import LABModel,HSVModel,Haralick,LBP,HOG,HistogramsSeveralMasksAnnulusLabSegments,HaarHOG
+from shallowmodels.models import LABModel,HSVModel,Haralick,LBP,HOG,HistogramsSeveralMasksAnnulusLabSegments,HaarHOG,DenseNet
 
 MODELS = {
 	"vgg16": VGG16,
@@ -48,13 +48,16 @@ class Extractor:
 			self.model = HOG()
 		if modelText == "haarhog":
 			self.model = HaarHOG()
-		if modelText == "manual888":
-			self.model = HistogramsSeveralMasksAnnulusLabSegments(plainImagePath="/home/joheras/Escritorio/Research/Fungi/FungiImages/plain.jpg")
-		if modelText == "manual444":
-			self.model = HistogramsSeveralMasksAnnulusLabSegments(plainImagePath="/home/joheras/Escritorio/Research/Fungi/FungiImages/plain.jpg",bags=[4,4,4])
-		if modelText == "manual161616":
+		if modelText == "densenet":
+			self.model = DenseNet()
+		if "annulus" in modelText:
+			bags = int(modelText[modelText.find('_')+1:modelText.rfind('_')])
+			p_segments = int(modelText[modelText.rfind('_')+1])
 			self.model = HistogramsSeveralMasksAnnulusLabSegments(
-				plainImagePath="/home/joheras/Escritorio/Research/Fungi/FungiImages/plain.jpg", bags=[16, 16, 16])
+				plainImagePath="/home/joheras/Escritorio/Research/Fungi/FungiImages/plain.jpg", bags=[bags,bags,bags],
+				p_segments=p_segments)
+
+
 
 	def reshape(self,res):
 		if(self.modelText=="resnet"):

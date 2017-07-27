@@ -8,6 +8,7 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 
+
 from sklearn.model_selection import KFold
 import h5py
 import cPickle
@@ -133,10 +134,10 @@ def compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParame
 
         # Normalization
         if normalization:
-            trainData = np.asarray(trainData).astype("float64")
+            trainData = np.asarray(trainData).astype("float32")
             trainData -= np.mean(trainData, axis=0)
             trainData /= np.std(trainData, axis=0)
-            testData = np.asarray(testData).astype("float64")
+            testData = np.asarray(testData).astype("float32")
             testData -= np.mean(testData, axis=0)
             testData /= np.std(testData, axis=0)
         for clf, params, name, n_iter in zip(listAlgorithms, listParameters, listAlgorithmNames, listNiters):
@@ -145,6 +146,9 @@ def compare_methods_h5py(featuresPath,labelEncoderPath,listAlgorithms,listParame
                 model = clf
             else:
                 model = RandomizedSearchCV(clf, param_distributions=params, n_iter=n_iter)
+
+            trainData = np.nan_to_num(trainData)
+            testData = np.nan_to_num(testData)
             model.fit(trainData, trainLabels)
             predictions = model.predict(testData)
             resultsAccuracy[name].append(accuracy_score(testLabels, predictions))

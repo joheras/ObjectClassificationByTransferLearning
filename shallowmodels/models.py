@@ -4,7 +4,27 @@ from skimage import exposure
 from skimage import feature
 from imutils import auto_canny
 import numpy as np
+import math
 from scipy.spatial import distance
+from DenseNet import densenet
+from keras.layers import Flatten
+from keras.models import Model
+
+class DenseNet:
+    def __init__(self):
+        modelI = densenet.DenseNet(depth=40, growth_rate=12, bottleneck=True, reduction=0.5)
+        modelI.layers.pop()
+        modelI.layers.pop()
+        modelI.outputs = [modelI.layers[-1].output]
+        modelI.layers[-1].outbound_nodes = []
+
+        new_input = modelI.input
+        hidden_layer = modelI.layers[-2].output
+        new_output = Flatten()(hidden_layer)
+        self.model = Model(new_input, new_output)
+
+    def describe(self,image):
+        return self.model.predict(image)
 
 class LABModel:
     def __init__(self,bins=[8,8,8],channels=[0,1,2],histValues=[0,256,0,256,0,256]):
@@ -74,11 +94,12 @@ class HaarHOG:
 
 class HistogramsSeveralMasksAnnulusLabSegments:
 
-    def __init__(self,plainImagePath,bags=[8,8,8],channels=[0,1,2],histValues=[0,256,0,256,0,256]):
+    def __init__(self,plainImagePath,bags=[8,8,8],channels=[0,1,2],histValues=[0,256,0,256,0,256],p_segments=2):
         self.plainImagePath = plainImagePath
         self.bags = bags
         self.channels = channels
         self.histValues=histValues
+        self.p_segments=p_segments
 
     def describe(self,image):
         (h,w) = image.shape[:2]
@@ -92,30 +113,57 @@ class HistogramsSeveralMasksAnnulusLabSegments:
                         range(1, 101, 1)]
         combinationPercentage = [((100 - n)) for n in range(1, 101, 1)]
 
-
+        segments = 2**self.p_segments
         # Mask to only keep the centre
         mask = np.zeros(control.shape[:2], dtype="uint8")
 
         (h, w) = control.shape[:2]
         (cX, cY) = (w / 2, h / 2)
-        masks = [mask.copy() for i in range(0, 32)]
+        masks = [mask.copy() for i in range(0, 8 * segments)]
         # Generating the different annulus masks
-        for i in range(0,32):
+        for i in range(0, 8 * segments):
             cv2.circle(masks[i], (cX, cY), min(90 - 10 * (i % 8), control.shape[1]) / 2, 255, -1)
             cv2.circle(masks[i], (cX, cY), min(80 - 10 * (i % 8), control.shape[1]) / 2, 0, -1)
-        # Keeping only segments of the annulus
-        for i in range(0, 8):
-            cv2.rectangle(masks[i], (cX, 0), (cX * 2, cY * 2), 0, -1)
-            cv2.rectangle(masks[i], (0, 0), (cX * 2, cY), 0, -1)
-        for i in range(8, 16):
-            cv2.rectangle(masks[i], (cX, 0), (cX * 2, cY * 2), 0, -1)
-            cv2.rectangle(masks[i], (0, cY), (cX * 2, cY * 2), 0, -1)
-        for i in range(16, 24):
-            cv2.rectangle(masks[i], (0, 0), (cX, cY * 2), 0, -1)
-            cv2.rectangle(masks[i], (0, 0), (cX * 2, cY), 0, -1)
-        for i in range(24, 32):
-            cv2.rectangle(masks[i], (0, 0), (cX, cY * 2), 0, -1)
-            cv2.rectangle(masks[i], (0, cY), (cX * 2, cY * 2), 0, -1)
+
+        if (self.p_segments == 2):
+            points = np.array([[cX, cY], [cX, 0], [0, 0], [0, h], [w, h], [w, cY], [cX, cY]], np.int32)
+            points = points.reshape((-1, 1, 2))
+            for i in range(0, 8):
+                cv2.fillConvexPoly(masks[i], points, 0)
+        else:
+            for k in range(0, 2 ** (self.p_segments - 2)):
+                alpha = (math.pi / 2 ** (self.p_segments - 1)) * (k + 1)
+                beta = (math.pi / 2 ** (self.p_segments - 1)) * k
+                if alpha <= math.pi / 4:
+                    points = np.array([[cX, cY], [w, h / 2 - w / 2 * math.tan(alpha)], [w, 0], [0, 0], [0, h], [w, h],
+                                       [w, h / 2 - w / 2 * math.tan(beta)], [cX, cY]], np.int32)
+                    points = points.reshape((-1, 1, 2))
+                    points2 = np.array([[cX, cY], [w, cY], [w, h / 2 - w / 2 * math.tan(beta)], [cX, cY]], np.int32)
+                    points2 = points2.reshape((-1, 1, 2))
+                    for i in range(0, 8):
+                        cv2.fillConvexPoly(masks[8 * k + i], points, 0)
+                        cv2.fillConvexPoly(masks[8 * k + i], points2, 0)
+
+
+                else:
+                    points = np.array([[cX, cY], [cX + (h / 2) / math.tan(alpha), 0], [0, 0], [0, h], [w, h], [w, 0],
+                                       [cX + (h / 2) / math.tan(beta), 0], [cX, cY]], np.int32)
+                    points = points.reshape((-1, 1, 2))
+                    points2 = np.array([[cX, cY], [cX + (h / 2) / math.tan(beta), 0], [w, 0], [w, cY], [cX, cY]],
+                                       np.int32)
+                    points2 = points2.reshape((-1, 1, 2))
+                    for i in range(0, 8):
+                        cv2.fillConvexPoly(masks[8 * k + i], points, 0)
+                        cv2.fillConvexPoly(masks[8 * k + i], points2, 0)
+
+        M90 = cv2.getRotationMatrix2D((cX, cY), 90, 1.0)
+        M180 = cv2.getRotationMatrix2D((cX, cY), 180, 1.0)
+        M270 = cv2.getRotationMatrix2D((cX, cY), 180, 1.0)
+
+        for i in range(0, 8 * (2 ** (self.p_segments - 2))):
+            masks[8 * (2 ** (self.p_segments - 2)) + i] = cv2.warpAffine(masks[i], M90, (w, h))
+            masks[2 * 8 * (2 ** (self.p_segments - 2)) + i] = cv2.warpAffine(masks[i], M180, (w, h))
+            masks[3 * 8 * (2 ** (self.p_segments - 2)) + i] = cv2.warpAffine(masks[i], M270, (w, h))
         results = []
 
 
